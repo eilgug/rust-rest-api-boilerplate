@@ -1,10 +1,10 @@
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
 use serde::Deserialize;
 
-use crate::errors::AppError;
 use crate::AppState;
+use crate::errors::AppError;
 
 /// Claims embedded in a Supabase-issued JWT.
 #[derive(Debug, Deserialize)]

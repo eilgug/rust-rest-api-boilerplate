@@ -74,9 +74,7 @@ pub async fn delete_profile(db: &DatabaseConnection, auth_id: &str) -> Result<()
         .await?
         .ok_or_else(|| AppError::NotFound("profile not found".into()))?;
 
-    profile::Entity::delete_by_id(profile.id)
-        .exec(db)
-        .await?;
+    profile::Entity::delete_by_id(profile.id).exec(db).await?;
 
     Ok(())
 }

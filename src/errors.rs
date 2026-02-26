@@ -1,6 +1,6 @@
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::Json;
 use serde_json::json;
 
 #[derive(thiserror::Error, Debug)]
@@ -30,9 +30,7 @@ impl IntoResponse for AppError {
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg.clone()),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg.clone()),
             AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg.clone()),
-            AppError::Validation(errors) => {
-                (StatusCode::UNPROCESSABLE_ENTITY, errors.to_string())
-            }
+            AppError::Validation(errors) => (StatusCode::UNPROCESSABLE_ENTITY, errors.to_string()),
             AppError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg.clone()),
             AppError::Database(err) => {
                 tracing::error!("Database error: {:?}", err);

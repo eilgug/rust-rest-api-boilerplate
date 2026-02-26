@@ -4,12 +4,12 @@ use axum::{Json, Router};
 use uuid::Uuid;
 use validator::Validate;
 
+use crate::AppState;
 use crate::errors::AppError;
 use crate::extractors::auth::AuthUser;
 use crate::extractors::validated_json::ValidatedJson;
 use crate::routes::ProfileResponse;
 use crate::services::user as user_service;
-use crate::AppState;
 
 #[derive(serde::Deserialize, Validate)]
 pub struct UpdateProfileRequest {

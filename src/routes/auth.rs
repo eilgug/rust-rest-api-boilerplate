@@ -2,11 +2,11 @@ use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
 
+use crate::AppState;
 use crate::errors::AppError;
 use crate::extractors::auth::AuthUser;
 use crate::routes::ProfileResponse;
 use crate::services::user as user_service;
-use crate::AppState;
 
 pub fn router() -> Router<AppState> {
     Router::new().route("/callback", post(auth_callback))

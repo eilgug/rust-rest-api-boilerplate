@@ -1,5 +1,5 @@
-use axum::routing::get;
 use axum::Router;
+use axum::routing::get;
 use sea_orm::DatabaseConnection;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
