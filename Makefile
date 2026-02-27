@@ -1,4 +1,4 @@
-.PHONY: setup db db-stop dev build check test fmt lint migrate clean
+.PHONY: setup db db-stop dev build check test fmt lint migrate migrate-new migrate-down migrate-rollback clean
 
 ## ── Environment ──────────────────────────────────────────────
 
@@ -37,8 +37,21 @@ lint: ## Run clippy lints
 
 ## ── Migrations ───────────────────────────────────────────────
 
-migrate: ## Run pending database migrations
-	cargo run -p migration
+migrate: ## Run all pending migrations (alias for migrate-up)
+	cargo run -p migration -- up
+
+migrate-new: ## Create a new migration file — usage: make migration-new NAME=create_users_table
+	@test -n "$(NAME)" || (echo "Usage: make migration-new NAME=<migration_name>"; exit 1)
+	cargo run -p migration -- new $(NAME)
+
+migrate-one: ## Run only the next pending migration
+	cargo run -p migration -- up -n 1
+
+migrate-down: ## Rollback all applied migrations
+	cargo run -p migration -- down
+
+migrate-rollback: ## Rollback only the last applied migration
+	cargo run -p migration -- down -n 1
 
 ## ── Cleanup ──────────────────────────────────────────────────
 

@@ -8,19 +8,19 @@ entities and routes.
 
 ## Tech Stack
 
-| Crate | Role |
-|---|---|
-| [Axum](https://docs.rs/axum) | HTTP framework (routing, extractors, middleware) |
-| [SeaORM](https://www.sea-ql.org/SeaORM/) | Async ORM for PostgreSQL (entities, queries, migrations) |
-| [Tokio](https://tokio.rs/) | Async runtime |
-| [jsonwebtoken](https://docs.rs/jsonwebtoken) | Supabase JWT validation (HS256) |
-| [validator](https://docs.rs/validator) | Declarative request body validation via derive macros |
-| [tower-http](https://docs.rs/tower-http) | CORS and HTTP request tracing layers |
-| [tracing](https://docs.rs/tracing) | Structured logging |
-| [thiserror](https://docs.rs/thiserror) | Ergonomic error type definitions |
-| [dotenvy](https://docs.rs/dotenvy) | `.env` file loading |
-| [chrono](https://docs.rs/chrono) | Date/time types for timestamps |
-| [uuid](https://docs.rs/uuid) | UUID generation and serialization |
+| Crate                                        | Role                                                     |
+| -------------------------------------------- | -------------------------------------------------------- |
+| [Axum](https://docs.rs/axum)                 | HTTP framework (routing, extractors, middleware)         |
+| [SeaORM](https://www.sea-ql.org/SeaORM/)     | Async ORM for PostgreSQL (entities, queries, migrations) |
+| [Tokio](https://tokio.rs/)                   | Async runtime                                            |
+| [jsonwebtoken](https://docs.rs/jsonwebtoken) | Supabase JWT validation (HS256)                          |
+| [validator](https://docs.rs/validator)       | Declarative request body validation via derive macros    |
+| [tower-http](https://docs.rs/tower-http)     | CORS and HTTP request tracing layers                     |
+| [tracing](https://docs.rs/tracing)           | Structured logging                                       |
+| [thiserror](https://docs.rs/thiserror)       | Ergonomic error type definitions                         |
+| [dotenvy](https://docs.rs/dotenvy)           | `.env` file loading                                      |
+| [chrono](https://docs.rs/chrono)             | Date/time types for timestamps                           |
+| [uuid](https://docs.rs/uuid)                 | UUID generation and serialization                        |
 
 ## Project Structure
 
@@ -140,19 +140,19 @@ curl http://localhost:3000/health
 
 ### Public
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/health` | Database connectivity check |
+| Method | Path      | Description                 |
+| ------ | --------- | --------------------------- |
+| `GET`  | `/health` | Database connectivity check |
 
 ### Protected (require `Authorization: Bearer <supabase-jwt>`)
 
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/auth/callback` | Upsert a profile after Supabase login |
-| `GET` | `/users/me` | Get the authenticated user's profile |
-| `PUT` | `/users/me` | Update the authenticated user's profile |
-| `DELETE` | `/users/me` | Delete the authenticated user's profile |
-| `GET` | `/users/{id}` | Get any user's profile by UUID |
+| Method   | Path             | Description                             |
+| -------- | ---------------- | --------------------------------------- |
+| `POST`   | `/auth/callback` | Upsert a profile after Supabase login   |
+| `GET`    | `/users/me`      | Get the authenticated user's profile    |
+| `PUT`    | `/users/me`      | Update the authenticated user's profile |
+| `DELETE` | `/users/me`      | Delete the authenticated user's profile |
+| `GET`    | `/users/{id}`    | Get any user's profile by UUID          |
 
 ### Error format
 
@@ -169,26 +169,105 @@ All errors return a consistent JSON structure:
 
 ## Makefile Targets
 
-| Target | Description |
-|---|---|
-| `make setup` | Copy `.env.example` to `.env` (skips if already exists) |
-| `make db` | Start PostgreSQL via Docker Compose |
-| `make db-stop` | Stop the database container |
-| `make dev` | Run the API with `RUST_LOG=debug` |
-| `make build` | Compile a release binary |
-| `make check` | Run `cargo check` (fast type-checking) |
-| `make test` | Run all tests |
-| `make fmt` | Format code with `rustfmt` |
-| `make lint` | Run `clippy` lints |
-| `make migrate` | Run pending migrations via the migration CLI |
-| `make clean` | Remove build artifacts |
+| Target                         | Description                                             |
+| ------------------------------ | ------------------------------------------------------- |
+| `make setup`                   | Copy `.env.example` to `.env` (skips if already exists) |
+| `make db`                      | Start PostgreSQL via Docker Compose                     |
+| `make db-stop`                 | Stop the database container                             |
+| `make dev`                     | Run the API with `RUST_LOG=debug`                       |
+| `make build`                   | Compile a release binary                                |
+| `make check`                   | Run `cargo check` (fast type-checking)                  |
+| `make test`                    | Run all tests                                           |
+| `make fmt`                     | Format code with `rustfmt`                              |
+| `make lint`                    | Run `clippy` lints                                      |
+| `make migrate`                 | Run **all** pending migrations                          |
+| `make migrate-new NAME=<name>` | Create a new migration file                             |
+| `make migrate-one`             | Run only the **next** pending migration                 |
+| `make migrate-down`            | Rollback **all** applied migrations                     |
+| `make migrate-rollback`        | Rollback only the **last** applied migration            |
+| `make clean`                   | Remove build artifacts                                  |
+
+## Migrations
+
+All migration commands use the `migration` crate CLI. You can invoke them via `make` targets or `cargo run -p migration` directly.
+
+### Create a new migration
+
+```bash
+make migrate-new NAME=create_users_table
+# or directly:
+cargo run -p migration -- new create_users_table
+```
+
+This generates a file like `migration/src/20260227_000001_create_users_table.rs` with the format
+`YYYYMMDD_SERIAL_name.rs` (serial is sequential per date, zero-padded to 6 digits).
+
+The file is pre-filled with `up` and `down` stubs:
+
+```rust
+async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    // TODO: implement the migration
+}
+
+async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    // TODO: implement the rollback
+}
+```
+
+After editing, **register the new migration** in `migration/src/lib.rs`:
+
+```rust
+mod m20260227_000001_create_users_table;
+
+pub struct Migrator;
+impl MigratorTrait for Migrator {
+    fn migrations() -> Vec<Box<dyn MigrationTrait>> {
+        vec![
+            Box::new(m20250223_000001_create_profiles_table::Migration),
+            Box::new(m20260227_000001_create_users_table::Migration), // ← add here
+        ]
+    }
+}
+```
+
+### Run all pending migrations
+
+```bash
+make migrate
+# or directly:
+cargo run -p migration -- up
+```
+
+### Run only the next migration
+
+```bash
+make migrate-one
+# or directly:
+cargo run -p migration -- up -n 1
+```
+
+### Rollback the last migration
+
+```bash
+make migrate-rollback
+# or directly:
+cargo run -p migration -- down -n 1
+```
+
+### Rollback all migrations
+
+```bash
+make migrate-down
+# or directly:
+cargo run -p migration -- down
+```
 
 ## Extending the Boilerplate
 
 To add a new entity (e.g. `posts`):
 
-1. **Migration** — create a new file in `migration/src/` (e.g. `m20250224_000001_create_posts_table.rs`)
-   and register it in `migration/src/lib.rs`
+1. **Migration** — run `make migrate-new NAME=create_posts_table`, implement `up`/`down`,
+   then register the struct in `migration/src/lib.rs`
 2. **Model** — add `src/models/post.rs` with the SeaORM entity and re-export it from `src/models/mod.rs`
 3. **Service** — add `src/services/post.rs` with your CRUD functions and re-export from `src/services/mod.rs`
 4. **Routes** — add `src/routes/post.rs`, create a `router()` function, and nest it in `src/main.rs`
